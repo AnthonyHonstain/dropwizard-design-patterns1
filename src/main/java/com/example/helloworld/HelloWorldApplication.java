@@ -1,5 +1,9 @@
 package com.example.helloworld;
 
+import com.example.helloworld.core.WeatherData;
+import com.example.helloworld.core.observers.CurrentWeather;
+import com.example.helloworld.core.observers.HistoricalWeather;
+import com.example.helloworld.core.observers.StatisticalWeather;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -24,9 +28,16 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
     @Override
     public void run(HelloWorldConfiguration configuration,
                     Environment environment) {
+
+        WeatherData weatherData = new WeatherData();
+        weatherData.addObserver("CurrentWeather", new CurrentWeather());
+        weatherData.addObserver("HistoricalWeather", new HistoricalWeather());
+        weatherData.addObserver("StatisticalWeather", new StatisticalWeather());
+
         final HelloWorldResource resource = new HelloWorldResource(
                 configuration.getTemplate(),
-                configuration.getDefaultName()
+                configuration.getDefaultName(),
+                weatherData
         );
         environment.jersey().register(resource);
 
