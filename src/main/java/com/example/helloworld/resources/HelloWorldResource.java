@@ -12,6 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Path("/hello-world")
@@ -48,17 +49,20 @@ public class HelloWorldResource {
      *   Whip
      *   Mocha
      *
-     * WARNING - the parameters need to line up and get used or you will see
-     * some nondescript validation/injection errors at runtime.
-     * @param drink
+     * Example:
+     *   http://localhost:8080/hello-world/calculateCost?drink=drip&modifiers=whip&modifiers=mocha
+     *   { "id": 3, "drinkName": "Drip", "drinkCost": "2.5" }
+     *
+     * @param drink - the base drink being ordered
+     * @param modifiers - the drink modifiers to apply
      * @return
      */
     @GET
     @Timed
     @Path("/calculateCost")
     public CalculatedCost calculateCost(
-            @QueryParam("drink") Optional<String> drink) {
-            //@QueryParam("modifiers") Optional<List<String>> modifiers) {
+            @QueryParam("drink") Optional<String> drink,
+            @QueryParam("modifiers") List<String> modifiers) {
 
         if (drink.isPresent()) {
             Drink newDrink;
@@ -69,6 +73,15 @@ public class HelloWorldResource {
                     break;
                 default: newDrink = new Drip();
                     break;
+            }
+
+            for (String modifier : modifiers) {
+                switch (modifier) {
+                    case "whip": newDrink.setWhip(true);
+                        break;
+                    case "mocha": newDrink.setMocha(true);
+                        break;
+                }
             }
 
             return new CalculatedCost(counter.incrementAndGet(),
