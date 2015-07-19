@@ -1,16 +1,15 @@
 package com.example.helloworld.resources;
 
 import com.example.helloworld.core.CalculatedCost;
-import com.example.helloworld.core.Drink;
-import com.example.helloworld.core.drinks.Drip;
-import com.example.helloworld.core.drinks.Espresso;
+import com.example.helloworld.core.beverages.Beverage;
+import com.example.helloworld.core.beverages.Drip;
+import com.example.helloworld.core.beverages.Espresso;
+import com.example.helloworld.core.condiments.Mocha;
+import com.example.helloworld.core.condiments.Whip;
 import com.google.common.base.Optional;
 import com.codahale.metrics.annotation.Timed;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -53,6 +52,9 @@ public class HelloWorldResource {
      *   http://localhost:8080/hello-world/calculateCost?drink=drip&modifiers=whip&modifiers=mocha
      *   { "id": 3, "drinkName": "Drip", "drinkCost": "2.5" }
      *
+     *   http://localhost:8080/hello-world/calculateCost?drink=espresso&modifiers=whip&modifiers=mocha&modifiers=mocha
+     *   { "id": 4, "drinkName": "Espresso Whip Mocha Mocha", "drinkCost": "4.9" }
+     *
      * @param drink - the base drink being ordered
      * @param modifiers - the drink modifiers to apply
      * @return
@@ -65,28 +67,29 @@ public class HelloWorldResource {
             @QueryParam("modifiers") List<String> modifiers) {
 
         if (drink.isPresent()) {
-            Drink newDrink;
+            Beverage newDrink;
             switch (drink.get()) {
                 case "drip": newDrink = new Drip();
                     break;
                 case "espresso": newDrink = new Espresso();
                     break;
-                default: newDrink = new Drip();
-                    break;
+                default: throw new WebApplicationException("Invalid drink choices");
             }
 
             for (String modifier : modifiers) {
                 switch (modifier) {
-                    case "whip": newDrink.setWhip(true);
+                    case "whip": newDrink = new Whip(newDrink);
                         break;
-                    case "mocha": newDrink.setMocha(true);
+                    case "mocha": newDrink = new Mocha(newDrink);
                         break;
+                    default: throw new WebApplicationException("Invalid drink choices");
                 }
             }
 
             return new CalculatedCost(counter.incrementAndGet(),
                     newDrink.describeDrink(), String.valueOf(newDrink.getCost()));
         }
-        return new CalculatedCost(counter.incrementAndGet(), "unknown", "0.0");
+        // TODO - we could do a better job of validating inputs.
+        throw new WebApplicationException("Invalid drink choices");
     }
 }
