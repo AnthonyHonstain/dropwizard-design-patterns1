@@ -24,14 +24,10 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
     @Override
     public void run(HelloWorldConfiguration configuration,
                     Environment environment) {
-        final HelloWorldResource resource = new HelloWorldResource(
-                configuration.getTemplate(),
-                configuration.getDefaultName()
-        );
+        final HelloWorldResource resource = new HelloWorldResource();
         environment.jersey().register(resource);
 
-        final TemplateHealthCheck healthCheck =
-                new TemplateHealthCheck(configuration.getTemplate());
+        final TemplateHealthCheck healthCheck = new TemplateHealthCheck();
         environment.healthChecks().register("template", healthCheck);
         environment.jersey().register(resource);
     }
