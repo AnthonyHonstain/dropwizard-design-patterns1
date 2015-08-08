@@ -1,5 +1,7 @@
 package com.example.helloworld.core;
 
+import com.example.helloworld.core.pizza.Pizza;
+
 public class PizzaOrder {
 
     private long id;

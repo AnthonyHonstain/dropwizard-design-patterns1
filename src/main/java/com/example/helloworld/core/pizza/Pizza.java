@@ -1,4 +1,4 @@
-package com.example.helloworld.core;
+package com.example.helloworld.core.pizza;
 
 /**
  * Created by Anthony Honstain on 7/25/15.

@@ -1,13 +1,14 @@
 package com.example.helloworld.resources;
 
-import com.example.helloworld.core.CheesePizza;
-import com.example.helloworld.core.GreekPizza;
-import com.example.helloworld.core.Pizza;
+import com.example.helloworld.core.pizza.CheesePizza;
+import com.example.helloworld.core.pizza.GreekPizza;
+import com.example.helloworld.core.pizza.Pizza;
 import com.example.helloworld.core.PizzaOrder;
+import com.example.helloworld.core.pizzafactory.IPizzaFactory;
+import com.example.helloworld.core.pizzafactory.NewYorkPizzaFactory;
 import com.google.common.base.Optional;
 import com.codahale.metrics.annotation.Timed;
 
-import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,14 +27,11 @@ public class HelloWorldResource {
     @Path("/orderPizza")
     public PizzaOrder orderPizza(@QueryParam("name") Optional<String> name) {
         final String value = name.or("CheesePizza");
-        Pizza newPizza;
-        switch (value) {
-            case "CheesePizza": newPizza = new CheesePizza();
-                break;
-            case "GreekPizza": newPizza = new GreekPizza();
-                break;
-            default: throw new WebApplicationException("Invalid pizza name");
-        }
+        // NOTE - this is not how I would handle REST endpoint
+        // validation, it is just a walk through of the factory pattern.
+        IPizzaFactory pizzaFactory = new NewYorkPizzaFactory();
+        Pizza newPizza = pizzaFactory.createPizza(value);
+
         return new PizzaOrder(counter.incrementAndGet(), newPizza);
     }
 }
